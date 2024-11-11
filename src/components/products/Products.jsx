@@ -1,71 +1,91 @@
 import {
   Box,
   Card,
+  CircularProgress,
   Divider,
+  Grid,
   Snackbar,
   SnackbarContent,
+  TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import Product1 from "../../assets/lays-img.png";
-import Product2 from "../../assets/KURKURE-img.webp";
-import Product3 from "../../assets/c1102090-1.jpg";
-import ShareIcon from "@mui/icons-material/Share";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import "./product.css";
 import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const dummyProducts = [
-  {
-    id: 1,
-    img: Product1,
-    name: "Product 1",
-    price: "10",
-  },
-  {
-    id: 2,
-    img: Product2,
-    name: "Product 2",
-    price: "20",
-  },
-  {
-    id: 3,
-    img: Product3,
-    name: "Product 3",
-    price: "30",
-  },
-];
-
-function Products() {
+const Products = () => {
   const [cartList, setCartList] = useState([]);
   const [openAlert, setOpenAlert] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [istLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  console.log(istLoading, "istLoading");
 
   const cartHandler = (product) => {
     const isExist = cartList.find((cart) => cart.id === product.id);
-    console.log(isExist);
 
     if (!isExist) {
       setCartList((prev) => [...prev, product]);
-
-      let strCartList = JSON.stringify(cartList)
-
-      localStorage.setItem("cartList", strCartList);
     } else {
       setOpenAlert(true);
     }
   };
+
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-
     setOpenAlert(false);
   };
 
+  const searchHandler = (event) => {
+    if (event?.target?.value === "") {
+    }
+    const filteredArr = products?.filter((product) =>
+      product?.title.toLowerCase().includes(event?.target?.value.toLowerCase())
+    );
+    setProducts(filteredArr);
+  };
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get("https://fakestoreapi.com/products");
+        console.log(response, "products");
+
+        setProducts(response?.data);
+
+        if (response.status === 200) {
+          setIsLoading(false);
+          setProducts(response?.data);
+        } else {
+          setIsLoading(true);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <>
+      <Box className="container mt-3">
+        <TextField
+          onChange={searchHandler}
+          size="small"
+          placeholder="Search items..."
+        />
+      </Box>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={openAlert}
@@ -79,44 +99,67 @@ function Products() {
           message={
             <Box className="d-flex justify-content-between">
               <span id="client-snackbar">Product already in cart list</span>
-              <CloseIcon sx={{float: "right"}} onClick={handleClose} />
+              <CloseIcon sx={{ float: "right" }} onClick={handleClose} />
             </Box>
           }
         />
       </Snackbar>
 
-      <Box sx={{ display: "flex", gap: "30px" }} className="container mt-3">
-        {dummyProducts?.map((product, index) => {
-          return (
-            <Card
-              key={index}
-              sx={{ padding: "20px", cursor: "pointer", width: "250px" }}
-            >
-              <Box>
-                <Box className="text-center">
-                  <img
-                    className="product-img"
-                    width={100}
-                    src={product.img}
-                    alt={product.name}
-                  />
-                </Box>
-                <Typography variant="h5" className="mt-3">
-                  {product.name}
-                </Typography>
-                <Divider sx={{ borderColor: "#333" }} variant="fullwidth" />
-                <Box className="d-flex justify-content-between mt-2">
-                  <ShareIcon />
-                  <FavoriteIcon />
-                  <AddShoppingCartIcon onClick={() => cartHandler(product)} />
-                </Box>
-              </Box>
-            </Card>
-          );
-        })}
-      </Box>
+      {istLoading ? (
+        <Box className="text-center mt-5">
+          <CircularProgress color="inherit" />
+        </Box>
+      ) : (
+        <Grid container className="container mt-3">
+          {products?.map((product, index) => {
+            return (
+              <Grid item xs={12} md={3} mb={3} key={index}>
+                <Card
+                  sx={{ padding: "20px", cursor: "pointer", width: "280px" }}
+                >
+                  <Box>
+                    <Box className="text-center">
+                      <img
+                        style={{ maxHeight: "140px", minHeight: "140px" }}
+                        className="product-img"
+                        width={100}
+                        src={product.image}
+                        alt={product.title}
+                      />
+                    </Box>
+                    <Tooltip title={product?.title} placement="top">
+                      <Typography variant="h6" className="mt-3">
+                        {product?.title?.length >= 22
+                          ? `${product?.title.slice(0, 18)}...`
+                          : product?.title}
+                      </Typography>
+                    </Tooltip>
+                    <Divider sx={{ borderColor: "#333" }} variant="fullwidth" />
+                    <Box className="d-flex justify-content-between mt-2">
+                      <Tooltip title="Product Details">
+                        <VisibilityIcon
+                          onClick={() => {
+                            navigate(`/product-details/${product?.id}`);
+                          }}
+                        />
+                      </Tooltip>
+                      <Tooltip title="Add to Favorite">
+                        <FavoriteIcon />
+                      </Tooltip>
+                      <Tooltip title="Add to Cart">
+                        <AddShoppingCartIcon
+                          onClick={() => cartHandler(product)}
+                        />
+                      </Tooltip>
+                    </Box>
+                  </Box>
+                </Card>
+              </Grid>
+            );
+          })}
+        </Grid>
+      )}
     </>
   );
-}
-
+};
 export default Products;
