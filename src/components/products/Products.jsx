@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Card,
   CircularProgress,
@@ -22,8 +23,11 @@ import { useNavigate } from "react-router-dom";
 const Products = () => {
   const [cartList, setCartList] = useState([]);
   const [openAlert, setOpenAlert] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [istLoading, setIsLoading] = useState(false);
+  const [categoryOptions, setCategotyOptions] = useState([]);
+  const [categoryFilter, setCategoryFilter] = useState({});
 
   const navigate = useNavigate();
 
@@ -59,13 +63,27 @@ const Products = () => {
       try {
         setIsLoading(true);
         const response = await axios.get("https://fakestoreapi.com/products");
-        console.log(response, "products");
 
         setProducts(response?.data);
 
         if (response.status === 200) {
           setIsLoading(false);
           setProducts(response?.data);
+          setAllProducts(response?.data);
+
+          const filterCategories = response?.data?.map((product) => {
+            return {
+              label: product?.category,
+              value: product?.category,
+              category: product.category,
+            };
+          });
+          const uniqueCategories = filterCategories.filter(
+            (item, index, self) =>
+              index === self.findIndex((t) => t.value === item.value)
+          );
+
+          setCategotyOptions(uniqueCategories);
         } else {
           setIsLoading(true);
         }
@@ -77,13 +95,32 @@ const Products = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    let filteredProducts = allProducts?.filter(
+      (products) => products?.category === categoryFilter?.value
+    );
+    setProducts(filteredProducts);
+    console.log(filteredProducts, 'filteredProducts' );
+    
+  }, [categoryFilter]);
+
   return (
     <>
-      <Box className="container mt-3">
+      <Box className="container mt-3 d-flex justify-content-between">
         <TextField
           onChange={searchHandler}
           size="small"
           placeholder="Search items..."
+        />
+        <Autocomplete
+          size="small"
+          disablePortal
+          options={categoryOptions}
+          sx={{ width: 240 }}
+          onChange={(e, newValue) => {
+            setCategoryFilter(newValue);
+          }}
+          renderInput={(params) => <TextField {...params} label="Categories" />}
         />
       </Box>
       <Snackbar

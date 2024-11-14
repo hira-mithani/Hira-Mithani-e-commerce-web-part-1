@@ -18,6 +18,7 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import CartList from "../cart-list/CartList";
 import { logDOM } from "@testing-library/react";
+import { Link } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -49,7 +50,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
+  
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create("width"),
     width: "100%",
@@ -111,7 +112,9 @@ export default function Header() {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+     <Link to="/sign-in">My account</Link>
+      </MenuItem>
     </Menu>
   );
 
@@ -174,7 +177,9 @@ export default function Header() {
     setCartItems(parseCartItemsArr);
   }, []);
 
+
   return (
+    
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
@@ -195,15 +200,6 @@ export default function Header() {
           >
             MUI
           </Typography>
-          {/* <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search> */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton
