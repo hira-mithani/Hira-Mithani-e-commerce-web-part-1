@@ -19,6 +19,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import CartList from "../cart-list/CartList";
 import { logDOM } from "@testing-library/react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -63,9 +64,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function Header() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-  const [cartItems, setCartItems] = React.useState([])
+  const [cartItems, setCartItems] = React.useState([]);
+const count = useSelector((state)=> state.counter);
 
-  console.log(cartItems?.length, 'cartItemscartItems');
+console.log(count, 'count');
+
+
   
 
   const [open, setOpen] = React.useState(false);
@@ -138,7 +142,7 @@ export default function Header() {
       <MenuItem>
         <IconButton size="large" aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="error">
-            <ShoppingCartIcon onClick={toggleDrawer(true)} />
+            <ShoppingCartIcon />
           </Badge>
         </IconButton>
         <p>Messages</p>
@@ -170,13 +174,6 @@ export default function Header() {
     </Menu>
   );
 
-  React.useEffect(() => {
-    const cartItemsArr = localStorage.getItem("cartList");
-    const parseCartItemsArr = JSON.parse(cartItemsArr);
-
-    setCartItems(parseCartItemsArr);
-  }, []);
-
 
   return (
     
@@ -207,7 +204,7 @@ export default function Header() {
               aria-label="show 4 new mails"
               color="inherit"
             >
-              <Badge badgeContent={cartItems?.length} color="error">
+              <Badge badgeContent={count?.value} color="error">
                 <ShoppingCartIcon onClick={toggleDrawer(true)} />
               </Badge>
             </IconButton>

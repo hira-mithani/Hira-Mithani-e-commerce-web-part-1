@@ -7,32 +7,17 @@ const CartList = (props) => {
   const { open, toggleDrawer } = props;
   const [cartItems, setCartItems] = useState([]);
 
-  console.log(cartItems);
-
   useEffect(() => {
     const cartItemsArr = localStorage.getItem("cartList");
-    const parseCartItemsArr = JSON.parse(cartItemsArr)
-
-    setCartItems(parseCartItemsArr);
-    
+    const parseCartItemsArr = JSON.parse(cartItemsArr);
+    setCartItems(parseCartItemsArr || []); 
   }, []);
 
   return (
     <div>
       <Drawer open={open} onClose={toggleDrawer(false)}>
-        <Box
-          sx={{ width: 250 }}
-          role="presentation"
-          onClick={toggleDrawer(false)}
-        >
+        <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
           <Typography variant="h5">Cart Items</Typography>
-          {cartItems?.map((item,index) => {
-            return <Box key={index}>
-              <img width="70px" src={item.img} alt="" />
-            <span>{item.name}</span>
-            <span>{item.price}</span>
-            </Box>;
-          })}
         </Box>
       </Drawer>
     </div>
@@ -40,3 +25,5 @@ const CartList = (props) => {
 };
 
 export default CartList;
+
+
